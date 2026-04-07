@@ -1,6 +1,7 @@
 ---
 name: vue-weui-next-demo
-description: This skill should be used when the user wants to generate Vue 3 component demos or pages that comply with the @tencent/vue-weui-next design specification. It ensures correct usage of MpButton, MpInput, MpDialog, MpCells and other Mp* components with proper full-import setup via main.ts, correct v-model bindings, and Vite + TypeScript project structure. Trigger phrases include: "用 vue-weui-next 写", "生成 WeUI 组件", "按照 WeUI 规范", "生成 Demo", "写一个 WeUI 页面", "@tencent/vue-weui-next".
+description: |
+  This skill should be used when the user wants to generate Vue 3 component demos or pages that comply with the @tencent/vue-weui-next design specification. It ensures correct usage of MpButton, MpInput, MpDialog, MpCells and other Mp* components with proper full-import setup via main.ts, correct v-model bindings, and Vite + TypeScript project structure. Trigger phrases include: "用 vue-weui-next 写", "生成 WeUI 组件", "按照 WeUI 规范", "生成 Demo", "写一个 WeUI 页面", "@tencent/vue-weui-next".
 ---
 
 # vue-weui-next Demo 生成规范
