@@ -1,82 +1,138 @@
-# vue-weui-next-demo Skill
+# vue-weui-next-demo
 
-> 基于微信 WeUI 设计规范，帮助产品经理在设计原型时按照已有组件规范快速出图，让设计与开发在同一套语言体系下对齐，减少沟通成本。
+> Claude Code Skill · 一次生成 WeUI 小程序页面的三份交付物
 
-## 解决什么问题
+输入页面需求，直接输出三份可用文件：**原型 + PRD、技术文档、Vue SFC**。
 
-在 WeUI 体系下，产品画原型、设计出稿、开发实现，三个角色往往用着不同的"语言"：
-
-- 产品用 Axure / Figma 画线框，不知道对应哪个组件
-- 设计出的稿件和组件库有出入，开发需要反复确认
-- 开发拿到原型不知道该用 `MpButton` 还是自己写样式
-
-这个 Skill 每次生成**三份文件**，各角色各取所需：
-
-| 文件 | 给谁 | 用途 |
-|------|------|------|
-| `页面名.html` | 产品 / 设计 | 浏览器直接打开，预览交互效果 |
-| `页面名_tech.html` | 开发 | 每个组件：截图效果 + HTML 结构 + Vue 写法三列并排 |
-| `页面名.vue` | 开发 | 直接复制进 Vue 工程使用 |
+> 需要**完整五阶段流程**（brainstorm → 设计参考风格预览 → 原型 → 技术文档 → Vue）？
+> 请使用 [product-weui-demo](https://github.com/PENGJANE/product-weui-demo-skill) skill。
 
 ---
 
-## 快速开始
+## 触发短语
 
-### 1. 安装 Skill
+```
+用 vue-weui-next 写         生成 WeUI 原型
+生成 WeUI 组件              按照 WeUI 规范
+生成 Demo                   写一个 WeUI 页面
+出一个原型图                @tencent/vue-weui-next
+```
+
+---
+
+## 交付物说明
+
+每次调用**必须输出三份文件**：
+
+| 文件 | 受众 | 内容 |
+|------|------|------|
+| `{页面名}.html` | 产品 / 设计 | 可交互原型 **+** 产品需求文档（每个状态的触发条件、界面呈现、用户操作、状态流转、数据来源）|
+| `{页面名}_tech.html` | 开发 | 左列：完整页面截图；右列：组件卡片（WeUI 可用 = live 预览 + Vue 代码；自定义 = 说明 + 自定义预览）|
+| `{页面名}.vue` | 开发 | 完整 Vue SFC，`<script setup lang="ts">`，直接复制进工程 |
+
+生成完成后运行截图脚本填充 `_tech.html` 左列截图：
 
 ```bash
+npm install puppeteer        # 首次安装
+node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js {页面名}.html
+```
+
+---
+
+## `{页面名}.html` — 原型 + PRD
+
+双重角色：
+
+- **原型**：WeUI CSS 渲染，浏览器直接预览，JS 切换多个页面状态
+- **PRD**：每个页面状态配产品逻辑说明，严格以 HTML 展示的视觉状态为准，不描述代码实现
+
+每个状态包含：**触发条件 · 界面呈现 · 用户操作 · 状态流转 · 数据来源**（如需调用外部 API）
+
+组件块标记规范（截图脚本依赖）：
+
+```html
+<!-- ✅ 每个组件单独一个块 -->
+<div data-component="主按钮" data-vue='<MpButton type="primary">提交</MpButton>'>
+  <a class="weui-btn weui-btn_primary">提交</a>
+</div>
+
+<!-- ❌ 多个组件混在一个块里 -->
+<div data-component="表单">...</div>
+```
+
+---
+
+## `{页面名}_tech.html` — 技术文档
+
+左右两列布局：
+
+```
+┌──────────────────────┬──────────────────────────────────┐
+│  左列：完整页面截图    │  右列：组件卡片                    │
+│                      │  ┌──────────────────────────────┐│
+│                      │  │ 组件名    [WeUI 可用]          ││
+│                      │  │ live WeUI HTML 预览            ││
+│                      │  │ Vue 代码 <pre>                ││
+│                      │  └──────────────────────────────┘│
+│                      │  ┌──────────────────────────────┐│
+│                      │  │ 组件名    [自定义]             ││
+│                      │  │ 说明文字                       ││
+│                      │  │ 自定义 HTML 预览               ││
+│                      │  └──────────────────────────────┘│
+└──────────────────────┴──────────────────────────────────┘
+```
+
+| 标签 | 卡片内容 |
+|------|---------|
+| `[WeUI 可用]` | `.comp-preview`（live HTML）+ `<pre>`（Vue 代码），**不附 HTML 代码** |
+| `[WeUI 部分可用]` | `.comp-preview` + `<pre>` + 一句调整说明 |
+| `[自定义]` | `.custom-note` 说明原因 + `.comp-preview`（自定义预览）|
+
+---
+
+## `{页面名}.vue` — Vue SFC
+
+工程 `main.ts` 全量引入，`.vue` 文件无需单独 import：
+
+```ts
+import { createApp } from 'vue'
+import WeUI from '@tencent/vue-weui-next'
+import App from './App.vue'
+import '@tencent/vue-weui-next/dist/index.css'
+
+createApp(App).use(WeUI).mount('#app')
+```
+
+v-model 规范：
+
+```vue
+<MpInput v-model="name" />          <!-- ✅ -->
+<MpDialog v-model="visible" />      <!-- ✅ -->
+<MpToast v-model:show="show" />     <!-- ✅ -->
+<MpInput :value="name" @input="…" /> <!-- ❌ -->
+```
+
+常见错误：
+
+| 错误写法 | 正确写法 |
+|---------|---------|
+| 在 .vue 中单独 import MpButton | 全量引入后无需 import |
+| 忘记引入 CSS | main.ts 中加 `import '@tencent/vue-weui-next/dist/index.css'` |
+| `<script setup>` 不加 `lang="ts"` | 加上 `lang="ts"` |
+| Dialog 事件用 `@confirm` | 应使用 `@ok` |
+
+---
+
+## 安装
+
+```bash
+# 方式一：clone 到 skill 目录
 git clone https://github.com/PENGJANE/vue-weui-next-demo-skill.git \
   ~/.codebuddy/skills/vue-weui-next-demo
-```
 
-### 2. 安装截图依赖（一次性）
-
-```bash
-npm install puppeteer
-```
-
-### 3. 在 Claude Code 中触发
-
-```
-出一个登录页原型，包含手机号输入、密码输入和登录按钮
-```
-
-Claude 会输出 `login.html` 和 `login.vue`，然后运行：
-
-```bash
-node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js login.html
-```
-
-自动生成 `login_tech.html`（技术文档，含组件截图）。
-
----
-
-## 技术文档长这样
-
-`_tech.html` 里每个组件都是三列并排：
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  手机号输入框                                             │
-├──────────────┬──────────────────┬───────────────────────┤
-│              │  HTML 结构        │  Vue 组件写法           │
-│  [截图]      │  <div class=      │  <MpInput             │
-│              │   "weui-cell…">  │    v-model="phone"    │
-│              │    ...           │    type="phone" />    │
-└──────────────┴──────────────────┴───────────────────────┘
-```
-
----
-
-## 触发方式
-
-```
-出一个原型图
-用 vue-weui-next 写一个表单页
-生成 WeUI 原型
-按照 WeUI 规范写一个登录页
-写一个 WeUI 页面
-@tencent/vue-weui-next
+# 方式二：手动复制
+cp SKILL.md ~/.claude/skills/vue-weui-next-demo/SKILL.md
+cp SKILL.md ~/.codebuddy/skills/vue-weui-next-demo/SKILL.md
 ```
 
 ---
@@ -85,14 +141,14 @@ node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js login.html
 
 ```
 vue-weui-next-demo/
-├── SKILL.md                         # Skill 主配置
+├── SKILL.md                      # Skill 主配置
 ├── scripts/
-│   └── screenshot.js                # Puppeteer 截图 + 技术文档生成脚本
+│   └── screenshot.js             # Puppeteer 截图脚本
 ├── references/
-│   ├── html_vue_mapping.md          # HTML 结构 ↔ Vue 组件对照表
-│   ├── api_reference.md             # 所有 Mp* 组件 Props / Events / Slots
-│   └── project_template.md         # Vue 工程 boilerplate
-└── assets/
+│   ├── html_vue_mapping.md       # HTML 结构 ↔ Vue 组件对照表
+│   ├── api_reference.md          # 所有 Mp* 组件 Props / Events / Slots
+│   └── project_template.md      # Vue 工程 boilerplate
+└── README.md
 ```
 
 ---
@@ -101,16 +157,16 @@ vue-weui-next-demo/
 
 | 层级 | 技术 |
 |------|------|
-| 原型样式 | WeUI CSS 2.6.0（CDN） |
-| Vue 组件库 | @tencent/vue-weui-next ~0.3.3 |
-| Vue 版本 | Vue 3 Composition API + `<script setup>` |
-| 构建工具 | Vite 5 + TypeScript |
+| 原型样式 | WeUI CSS 2.6.0（CDN）|
+| Vue 组件库 | @tencent/vue-weui-next |
+| Vue 版本 | Vue 3 Composition API + `<script setup lang="ts">` |
 | 截图工具 | Puppeteer |
 
 ---
 
-## 参考资料
+## 关联资源
 
+- [product-weui-demo-skill](https://github.com/PENGJANE/product-weui-demo-skill) — 完整五阶段流程（含 brainstorm + 设计参考风格预览）
 - [WeUI 官方文档](https://weui.io)
 - [vue-weui-next 组件文档](https://vue-weui-next.pages.woa.com/docs/guide/quickstart.html)
 - [HTML ↔ Vue 映射表](./references/html_vue_mapping.md)
