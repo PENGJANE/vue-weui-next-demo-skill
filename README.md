@@ -1,6 +1,6 @@
 # vue-weui-next-demo Skill
 
-> 一个用于 [Claude Code](https://claude.ai/code) 的 Skill，帮你快速生成符合 `@tencent/vue-weui-next` 规范的 Vue 3 组件 Demo 和页面。
+> 基于微信 WeUI 设计规范，帮助产品经理在设计原型时按照已有组件规范快速出图，让设计与开发在同一套语言体系下对齐，减少沟通成本。
 
 ## 能做什么
 
