@@ -2,7 +2,7 @@
 
 > Claude Code Skill · 一次生成 WeUI 小程序页面的四份交付物
 
-输入页面需求，直接输出四份可用文件：**可交互原型、PRD（含截图可导出 Word）、技术文档、Vue SFC**。
+输入页面需求，直接输出四份可用文件：**可交互原型、PRD Word 文档（含截图）、技术文档、Vue SFC**。
 
 > 需要**完整五阶段流程**（brainstorm → 设计参考风格预览 → 原型 → PRD → 技术文档 → Vue）？
 > 请使用 [product-weui-demo](https://github.com/PENGJANE/product-weui-demo-skill) skill。
@@ -27,22 +27,19 @@
 | 文件 | 受众 | 内容 |
 |------|------|------|
 | `{页面名}.html` | 产品 / 设计 | **可交互原型**：WeUI CSS 渲染，JS 切换多个页面状态 |
-| `{页面名}_prd.html` | 产品 / 设计 | **产品需求文档**：A4 排版，每个状态含触发条件 / 界面呈现 / 用户操作 / 状态流转 / 数据来源 + 截图，可导出 Word |
+| `{页面名}_prd.docx` | 产品 / 设计 | **产品需求文档**：Word 格式，每个状态含触发条件 / 界面呈现 / 用户操作 / 状态流转 / 数据来源 + 截图 |
 | `{页面名}_tech.html` | 开发 | 左列：完整页面截图；右列：组件卡片（WeUI 可用 = live 预览 + Vue 代码；自定义 = 说明 + 自定义预览）|
 | `{页面名}.vue` | 开发 | 完整 Vue SFC，`<script setup lang="ts">`，直接复制进工程 |
 
-生成完成后运行截图脚本，填充 PRD 和技术文档中的截图：
+### 截图 + PRD 生成顺序（不可颠倒）
 
 ```bash
+# 第一步：生成截图
 npm install puppeteer        # 首次安装
 node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js {页面名}.html
-```
 
-PRD 导出 Word（可选）：
-
-```bash
+# 第二步：截图就位后转换为 Word
 pandoc {页面名}_prd.html -o {页面名}_prd.docx
-# 或在浏览器中 File → Save as → Word Document (.doc)
 ```
 
 ---
@@ -65,9 +62,9 @@ pandoc {页面名}_prd.html -o {页面名}_prd.docx
 
 ---
 
-## `{页面名}_prd.html` — 产品需求文档
+## `{页面名}_prd.html` → `{页面名}_prd.docx` — 产品需求文档
 
-**独立 PRD 文件，A4 排版，print-friendly，可导出 Word。**
+**Claude 生成中间 HTML，截图就位后 pandoc 转为 Word 直接交付。**
 
 整体结构：
 - **封面**：页面名称 / 版本 / 日期 / 作者

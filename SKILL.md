@@ -1,7 +1,7 @@
 ---
 name: vue-weui-next-demo
 description: |
-  Use when generating WeUI mini-program prototype pages that need to align product, design, and development. Trigger phrases: "用 vue-weui-next 写", "生成 WeUI 原型", "生成 WeUI 组件", "按照 WeUI 规范", "生成 Demo", "写一个 WeUI 页面", "出一个原型图", "@tencent/vue-weui-next". Produces four files: interactive HTML prototype, PRD HTML (Word-exportable with screenshots), tech doc HTML, and a .vue file.
+  Use when generating WeUI mini-program prototype pages that need to align product, design, and development. Trigger phrases: "用 vue-weui-next 写", "生成 WeUI 原型", "生成 WeUI 组件", "按照 WeUI 规范", "生成 Demo", "写一个 WeUI 页面", "出一个原型图", "@tencent/vue-weui-next". Produces four files: interactive HTML prototype, PRD Word doc (with screenshots via pandoc), tech doc HTML, and a .vue file.
 ---
 
 # vue-weui-next 生成规范
@@ -11,23 +11,22 @@ description: |
 | 文件 | 受众 | 内容 |
 |------|------|------|
 | `{页面名}.html` | 产品 / 设计 | **可交互原型**：WeUI CSS 渲染，JS 切换多个页面状态 |
-| `{页面名}_prd.html` | 产品 / 设计 | **产品需求文档**：A4 排版，每个状态含触发条件 / 界面呈现 / 用户操作 / 状态流转 / 数据来源 + 截图，可导出为 Word |
+| `{页面名}_prd.docx` | 产品 / 设计 | **产品需求文档**：Word 格式，每个状态含触发条件 / 界面呈现 / 用户操作 / 状态流转 / 数据来源 + 截图，直接交付 |
 | `{页面名}_tech.html` | 开发 | 每个页面状态截图（左）+ 组件卡片拆解（右）：live WeUI 预览 + Vue 代码 |
 | `{页面名}.vue` | 开发 | 完整 Vue SFC，直接复制进工程使用 |
 
-生成完四份文件后，**必须提示用户运行截图脚本**，截图生成后 PRD 和技术文档的图片才会填充：
+生成完四份文件后，**必须按顺序执行以下步骤**：
 
 ```bash
+# 第一步：生成截图（截图脚本依赖原型 HTML）
 npm install puppeteer   # 首次安装
 node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js {页面名}.html
-```
 
-PRD 转 Word（可选）：
-
-```bash
+# 第二步：截图就位后，再转换为 Word 文档
 pandoc {页面名}_prd.html -o {页面名}_prd.docx
-# 或在浏览器中 File → Save as → Word Document (.doc)
 ```
+
+**顺序不可颠倒**：pandoc 必须在截图生成后执行，否则 .docx 内图片全部空缺。
 
 ---
 
@@ -85,11 +84,11 @@ function showState(name) {
 
 ---
 
-## 二、产品需求文档（`{页面名}_prd.html`）
+## 二、产品需求文档（`{页面名}_prd.html` → `{页面名}_prd.docx`）
 
 ### 定位
 
-独立的 PRD 文件，面向产品 / 设计。A4 排版，print-friendly，可用 pandoc 或浏览器直接导出为 Word。
+独立 PRD 文件，面向产品 / 设计。**Claude 生成中间 HTML，截图就位后用 pandoc 转为 Word（.docx）直接交付。**
 
 ### 整体结构
 
