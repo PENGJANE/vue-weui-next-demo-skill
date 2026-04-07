@@ -1,55 +1,65 @@
 ---
 name: vue-weui-next-demo
 description: |
-  Use when generating WeUI mini-program prototype pages that need to align product, design, and development. Trigger phrases: "用 vue-weui-next 写", "生成 WeUI 原型", "生成 WeUI 组件", "按照 WeUI 规范", "生成 Demo", "写一个 WeUI 页面", "出一个原型图", "@tencent/vue-weui-next". Produces three files: HTML prototype+PRD, tech doc HTML, and a .vue file.
+  Use when generating WeUI mini-program prototype pages that need to align product, design, and development. Trigger phrases: "用 vue-weui-next 写", "生成 WeUI 原型", "生成 WeUI 组件", "按照 WeUI 规范", "生成 Demo", "写一个 WeUI 页面", "出一个原型图", "@tencent/vue-weui-next". Produces four files: interactive HTML prototype, PRD HTML (Word-exportable with screenshots), tech doc HTML, and a .vue file.
 ---
 
 # vue-weui-next 生成规范
 
-## 输出文件（每次必须输出三份）
+## 输出文件（每次必须输出四份）
 
 | 文件 | 受众 | 内容 |
 |------|------|------|
-| `{页面名}.html` | 产品 / 设计 | 可交互原型 **+** 产品需求文档（逻辑说明 + 状态截图） |
+| `{页面名}.html` | 产品 / 设计 | **可交互原型**：WeUI CSS 渲染，JS 切换多个页面状态 |
+| `{页面名}_prd.html` | 产品 / 设计 | **产品需求文档**：A4 排版，每个状态含触发条件 / 界面呈现 / 用户操作 / 状态流转 / 数据来源 + 截图，可导出为 Word |
 | `{页面名}_tech.html` | 开发 | 每个页面状态截图（左）+ 组件卡片拆解（右）：live WeUI 预览 + Vue 代码 |
 | `{页面名}.vue` | 开发 | 完整 Vue SFC，直接复制进工程使用 |
 
-生成完三份文件后，**必须提示用户运行截图脚本**：
+生成完四份文件后，**必须提示用户运行截图脚本**，截图生成后 PRD 和技术文档的图片才会填充：
 
 ```bash
 npm install puppeteer   # 首次安装
 node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js {页面名}.html
 ```
 
+PRD 转 Word（可选）：
+
+```bash
+pandoc {页面名}_prd.html -o {页面名}_prd.docx
+# 或在浏览器中 File → Save as → Word Document (.doc)
+```
+
 ---
 
-## 一、HTML 原型 + 产品需求文档（`{页面名}.html`）
+## 一、可交互原型（`{页面名}.html`）
 
 ### 定位
 
-这份文件同时扮演两个角色：
-- **原型**：WeUI CSS 渲染，浏览器直接预览，JS 切换多个页面状态
-- **PRD**：每个页面状态配产品逻辑说明，严格以 **HTML 展示的视觉状态/流程** 为准，不照搬代码逻辑
+**纯原型**，不含产品说明文字。WeUI CSS 渲染，浏览器直接预览，JS 切换多个页面状态。
 
-### 内容结构（每个页面状态）
+### 多状态切换结构
 
+```html
+<script>
+function showState(name) {
+  document.querySelectorAll('.state-panel').forEach(el => el.style.display = 'none')
+  document.getElementById('state-' + name).style.display = 'block'
+}
+</script>
+
+<!-- 顶部状态切换标签 -->
+<div class="state-tabs">
+  <button onclick="showState('partial')">部分满足</button>
+  <button onclick="showState('all')">全部满足</button>
+</div>
+
+<div id="state-partial" class="state-panel"><!-- 状态一 --></div>
+<div id="state-all"     class="state-panel" style="display:none"><!-- 状态二 --></div>
 ```
-[页面状态标题]
-[产品逻辑说明段落] ← 描述用户在这个状态下看到什么、能做什么、触发什么
-[截图或 live 渲染的 WeUI 原型区域]
-[数据来源说明（如需调用外部 API，如 WE分析）]
-```
 
-### 产品逻辑说明原则
+### 组件块标记（截图脚本依赖）
 
-- **以展示状态为准**：说明这个状态的触发条件、界面呈现、用户可执行操作、流转逻辑
-- **不写代码逻辑**：不描述变量名、computed、ref 等实现细节
-- **外部数据标注**：凡需调用第三方 API（如 WE分析评分、日活数据）必须标注数据来源和接入方式
-- **覆盖所有状态变体**：部分满足、全部满足、审核中、冷却期等每个状态单独说明
-
-### 组件块标记（必须遵循）
-
-每个组件必须用 `<div data-component="..." data-vue="...">` 包裹，截图脚本依赖这两个属性：
+每个组件必须用 `<div data-component="..." data-vue="...">` 包裹：
 
 - `data-component`：组件中文名（用于技术文档标题和截图文件名）
 - `data-vue`：对应 Vue 组件完整写法（单行字符串）
@@ -75,7 +85,104 @@ node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js {页面名}.ht
 
 ---
 
-## 二、技术文档（`{页面名}_tech.html`）
+## 二、产品需求文档（`{页面名}_prd.html`）
+
+### 定位
+
+独立的 PRD 文件，面向产品 / 设计。A4 排版，print-friendly，可用 pandoc 或浏览器直接导出为 Word。
+
+### 整体结构
+
+```
+封面
+  页面名称 / 版本 / 日期 / 作者
+
+目录
+  各状态编号 + 名称
+
+正文（每个页面状态一节）
+  ## {编号}. {状态名称}
+  ### 触发条件
+  ### 界面呈现
+  ### 用户操作
+  ### 状态流转
+  ### 数据来源（如有）
+  [截图]
+
+修订记录
+```
+
+### 截图嵌入
+
+截图由截图脚本生成，放在 `{页面名}_screenshots/` 目录：
+
+```html
+<img src="./{页面名}_screenshots/{编号}_{状态名}.png"
+     alt="{状态名} 页面截图"
+     style="max-width:375px; border:1px solid #eee; border-radius:8px; display:block; margin:16px 0;" />
+```
+
+### A4 排版 CSS（直接复制）
+
+```html
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #f0f0f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: #111;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.page {
+  width: 794px;       /* A4 96dpi */
+  min-height: 1123px;
+  margin: 32px auto;
+  background: #fff;
+  padding: 72px 80px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.1);
+}
+/* 封面 */
+.cover { text-align: center; padding: 120px 0 80px; border-bottom: 2px solid #07c160; margin-bottom: 48px; }
+.cover h1 { font-size: 28px; font-weight: 700; margin: 0 0 12px; }
+.cover .meta { font-size: 13px; color: #888; line-height: 2; }
+/* 目录 */
+.toc h2 { font-size: 18px; font-weight: 700; border-left: 4px solid #07c160; padding-left: 12px; margin-bottom: 16px; }
+.toc ol { padding-left: 20px; }
+.toc li { margin-bottom: 6px; font-size: 14px; }
+/* 正文 */
+.section { margin-top: 48px; padding-top: 24px; border-top: 1px solid #eee; }
+.section h2 { font-size: 20px; font-weight: 700; margin: 0 0 20px; color: #07c160; }
+.section h3 { font-size: 15px; font-weight: 600; margin: 20px 0 8px; color: #333; }
+.section p  { margin: 0 0 10px; }
+.section ul { padding-left: 20px; margin: 0 0 10px; }
+.section li { margin-bottom: 4px; }
+.screenshot-wrap { margin: 20px 0; }
+.screenshot-wrap img { max-width: 375px; border: 1px solid #eee; border-radius: 8px; display: block; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.screenshot-wrap figcaption { font-size: 12px; color: #999; margin-top: 6px; }
+/* 修订记录 */
+.revision table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.revision th, .revision td { border: 1px solid #eee; padding: 8px 12px; text-align: left; }
+.revision th { background: #f5f5f5; font-weight: 600; }
+/* 打印 */
+@media print {
+  body { background: #fff; }
+  .page { margin: 0; box-shadow: none; padding: 36px 48px; }
+  .section { page-break-inside: avoid; }
+}
+</style>
+```
+
+### 产品逻辑说明原则
+
+- **以展示状态为准**：按 HTML 原型的视觉状态写，不描述代码变量名、computed、ref 等实现细节
+- **外部数据必须标注**：凡需调用第三方 API（如 WE分析评分、日活数据）必须注明数据来源和接入方式
+- **覆盖所有状态变体**：不能遗漏任何一个状态
+
+---
+
+## 三、技术文档（`{页面名}_tech.html`）
 
 ### 布局结构
 
@@ -160,7 +267,7 @@ pre { margin: 0; padding: 10px 12px; background: #f8f8f8; border-radius: 6px; fo
 
 ---
 
-## 三、Vue 文件规范（`{页面名}.vue`）
+## 四、Vue 文件规范（`{页面名}.vue`）
 
 ### 全量引入前提
 

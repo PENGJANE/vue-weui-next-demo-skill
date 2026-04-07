@@ -1,10 +1,10 @@
 # vue-weui-next-demo
 
-> Claude Code Skill · 一次生成 WeUI 小程序页面的三份交付物
+> Claude Code Skill · 一次生成 WeUI 小程序页面的四份交付物
 
-输入页面需求，直接输出三份可用文件：**原型 + PRD、技术文档、Vue SFC**。
+输入页面需求，直接输出四份可用文件：**可交互原型、PRD（含截图可导出 Word）、技术文档、Vue SFC**。
 
-> 需要**完整五阶段流程**（brainstorm → 设计参考风格预览 → 原型 → 技术文档 → Vue）？
+> 需要**完整五阶段流程**（brainstorm → 设计参考风格预览 → 原型 → PRD → 技术文档 → Vue）？
 > 请使用 [product-weui-demo](https://github.com/PENGJANE/product-weui-demo-skill) skill。
 
 ---
@@ -22,31 +22,34 @@
 
 ## 交付物说明
 
-每次调用**必须输出三份文件**：
+每次调用**必须输出四份文件**：
 
 | 文件 | 受众 | 内容 |
 |------|------|------|
-| `{页面名}.html` | 产品 / 设计 | 可交互原型 **+** 产品需求文档（每个状态的触发条件、界面呈现、用户操作、状态流转、数据来源）|
+| `{页面名}.html` | 产品 / 设计 | **可交互原型**：WeUI CSS 渲染，JS 切换多个页面状态 |
+| `{页面名}_prd.html` | 产品 / 设计 | **产品需求文档**：A4 排版，每个状态含触发条件 / 界面呈现 / 用户操作 / 状态流转 / 数据来源 + 截图，可导出 Word |
 | `{页面名}_tech.html` | 开发 | 左列：完整页面截图；右列：组件卡片（WeUI 可用 = live 预览 + Vue 代码；自定义 = 说明 + 自定义预览）|
 | `{页面名}.vue` | 开发 | 完整 Vue SFC，`<script setup lang="ts">`，直接复制进工程 |
 
-生成完成后运行截图脚本填充 `_tech.html` 左列截图：
+生成完成后运行截图脚本，填充 PRD 和技术文档中的截图：
 
 ```bash
 npm install puppeteer        # 首次安装
 node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js {页面名}.html
 ```
 
+PRD 导出 Word（可选）：
+
+```bash
+pandoc {页面名}_prd.html -o {页面名}_prd.docx
+# 或在浏览器中 File → Save as → Word Document (.doc)
+```
+
 ---
 
-## `{页面名}.html` — 原型 + PRD
+## `{页面名}.html` — 可交互原型
 
-双重角色：
-
-- **原型**：WeUI CSS 渲染，浏览器直接预览，JS 切换多个页面状态
-- **PRD**：每个页面状态配产品逻辑说明，严格以 HTML 展示的视觉状态为准，不描述代码实现
-
-每个状态包含：**触发条件 · 界面呈现 · 用户操作 · 状态流转 · 数据来源**（如需调用外部 API）
+**纯原型，不含产品说明文字。** WeUI CSS 渲染，浏览器直接预览，JS 切换多个页面状态。
 
 组件块标记规范（截图脚本依赖）：
 
@@ -58,6 +61,25 @@ node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js {页面名}.ht
 
 <!-- ❌ 多个组件混在一个块里 -->
 <div data-component="表单">...</div>
+```
+
+---
+
+## `{页面名}_prd.html` — 产品需求文档
+
+**独立 PRD 文件，A4 排版，print-friendly，可导出 Word。**
+
+整体结构：
+- **封面**：页面名称 / 版本 / 日期 / 作者
+- **目录**：各状态编号 + 名称
+- **正文**：每个状态一节，包含触发条件 / 界面呈现 / 用户操作 / 状态流转 / 数据来源 + 截图
+- **修订记录**
+
+截图嵌入（由截图脚本生成后自动填充）：
+
+```html
+<img src="./{页面名}_screenshots/{编号}_{状态名}.png"
+     style="max-width:375px; border-radius:8px;" />
 ```
 
 ---
@@ -112,15 +134,6 @@ v-model 规范：
 <MpInput :value="name" @input="…" /> <!-- ❌ -->
 ```
 
-常见错误：
-
-| 错误写法 | 正确写法 |
-|---------|---------|
-| 在 .vue 中单独 import MpButton | 全量引入后无需 import |
-| 忘记引入 CSS | main.ts 中加 `import '@tencent/vue-weui-next/dist/index.css'` |
-| `<script setup>` 不加 `lang="ts"` | 加上 `lang="ts"` |
-| Dialog 事件用 `@confirm` | 应使用 `@ok` |
-
 ---
 
 ## 安装
@@ -150,17 +163,6 @@ vue-weui-next-demo/
 │   └── project_template.md      # Vue 工程 boilerplate
 └── README.md
 ```
-
----
-
-## 技术栈
-
-| 层级 | 技术 |
-|------|------|
-| 原型样式 | WeUI CSS 2.6.0（CDN）|
-| Vue 组件库 | @tencent/vue-weui-next |
-| Vue 版本 | Vue 3 Composition API + `<script setup lang="ts">` |
-| 截图工具 | Puppeteer |
 
 ---
 
