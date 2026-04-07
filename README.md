@@ -10,80 +10,104 @@
 - 设计出的稿件和组件库有出入，开发需要反复确认
 - 开发拿到原型不知道该用 `MpButton` 还是自己写样式
 
-这个 Skill 的核心思路是：**以 HTML 原型为桥梁**，每个 HTML 结构都标注对应的 Vue `Mp*` 组件，让三个角色拿到同一份输出物，各自找到自己需要的信息。
+这个 Skill 每次生成**三份文件**，各角色各取所需：
 
-```
-产品 → 浏览器打开 HTML，直接看交互效果
-设计 → HTML 样式来自 WeUI 官方 CSS，视觉完全对齐
-开发 → 看注释里的 Vue 组件写法，直接复制使用
-```
+| 文件 | 给谁 | 用途 |
+|------|------|------|
+| `页面名.html` | 产品 / 设计 | 浏览器直接打开，预览交互效果 |
+| `页面名_tech.html` | 开发 | 每个组件：截图效果 + HTML 结构 + Vue 写法三列并排 |
+| `页面名.vue` | 开发 | 直接复制进 Vue 工程使用 |
 
-## 输出示例
+---
 
-输入：`出一个带输入框和提交按钮的登录页`
+## 快速开始
 
-输出 HTML 原型（节选）：
-```html
-<!-- Vue: <MpInput v-model="phone" type="phone" placeholder="请输入手机号" /> -->
-<div class="weui-cell weui-cell_input">
-  <div class="weui-cell__hd"><label class="weui-label">手机号</label></div>
-  <div class="weui-cell__bd">
-    <input class="weui-input" type="tel" placeholder="请输入手机号" />
-  </div>
-</div>
-
-<!-- Vue: <MpButton type="primary" @click="onSubmit">登录</MpButton> -->
-<a class="weui-btn weui-btn_primary">登录</a>
-```
-
-## 安装
+### 1. 安装 Skill
 
 ```bash
 git clone https://github.com/PENGJANE/vue-weui-next-demo-skill.git \
   ~/.codebuddy/skills/vue-weui-next-demo
 ```
 
-## 触发方式
+### 2. 安装截图依赖（一次性）
 
-在 Claude Code 中输入以下任意短语即可激活：
+```bash
+npm install puppeteer
+```
+
+### 3. 在 Claude Code 中触发
+
+```
+出一个登录页原型，包含手机号输入、密码输入和登录按钮
+```
+
+Claude 会输出 `login.html` 和 `login.vue`，然后运行：
+
+```bash
+node ~/.codebuddy/skills/vue-weui-next-demo/scripts/screenshot.js login.html
+```
+
+自动生成 `login_tech.html`（技术文档，含组件截图）。
+
+---
+
+## 技术文档长这样
+
+`_tech.html` 里每个组件都是三列并排：
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  手机号输入框                                             │
+├──────────────┬──────────────────┬───────────────────────┤
+│              │  HTML 结构        │  Vue 组件写法           │
+│  [截图]      │  <div class=      │  <MpInput             │
+│              │   "weui-cell…">  │    v-model="phone"    │
+│              │    ...           │    type="phone" />    │
+└──────────────┴──────────────────┴───────────────────────┘
+```
+
+---
+
+## 触发方式
 
 ```
 出一个原型图
 用 vue-weui-next 写一个表单页
 生成 WeUI 原型
 按照 WeUI 规范写一个登录页
-生成 Demo
 写一个 WeUI 页面
 @tencent/vue-weui-next
 ```
 
-## 输出格式说明
-
-| 场景 | 输出格式 |
-|------|---------|
-| 产品出原型 / 设计确认 / 未明确说明 | **HTML 原型**（含 Vue 组件注释） |
-| 开发需要可运行代码 | **Vue 3 + Vite + TypeScript 工程** |
+---
 
 ## 目录结构
 
 ```
 vue-weui-next-demo/
-├── SKILL.md                         # Skill 主配置（Claude Code 读取）
+├── SKILL.md                         # Skill 主配置
+├── scripts/
+│   └── screenshot.js                # Puppeteer 截图 + 技术文档生成脚本
 ├── references/
-│   ├── html_vue_mapping.md          # HTML 结构 ↔ Vue 组件双向对照表（核心）
+│   ├── html_vue_mapping.md          # HTML 结构 ↔ Vue 组件对照表
 │   ├── api_reference.md             # 所有 Mp* 组件 Props / Events / Slots
-│   └── project_template.md         # Vue 工程 boilerplate 模板
-└── assets/                          # 预留资源目录
+│   └── project_template.md         # Vue 工程 boilerplate
+└── assets/
 ```
+
+---
 
 ## 技术栈
 
 | 层级 | 技术 |
 |------|------|
-| 原型样式 | WeUI CSS 2.6.0（CDN 引入） |
+| 原型样式 | WeUI CSS 2.6.0（CDN） |
 | Vue 组件库 | @tencent/vue-weui-next ~0.3.3 |
-| Vue 版本 | Vue 3 Composition API |
+| Vue 版本 | Vue 3 Composition API + `<script setup>` |
 | 构建工具 | Vite 5 + TypeScript |
+| 截图工具 | Puppeteer |
+
+---
 
 ## 参考资料
 
